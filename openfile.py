@@ -1,36 +1,60 @@
+from pathlib import Path
 from nltk.stem import SnowballStemmer
 from nltk.tokenize import word_tokenize, sent_tokenize
 from collections import Counter
 import string
-
-ss = SnowballStemmer(language="english")
+import nltk
+nltk.download('punkt')
 
 
 class Word:
-    def __init__(self, word, frequency):
+    TF = 0
+    IDF = 0
+
+    def __init__(self, word, TF):
         self.word = word
-        self.frequency = frequency
+        self.TF = TF
+
+    tf_idf = TF*IDF
 
 
-f = open("lol.txt")
+def k(Word, listaFajlova):
+    brojac = 0
+    for fajl in listaFajlova:
+        currText = fajl.read()
+        allWordsinCurrFile = snowball_stemmer.word_tokenize(currText)
+        for rec in allWordsinCurrFile:
+            if(Word.word == rec):
+                br += 1
+                break
+    return brojac
 
-fileText = f.read()
-translateDict = str.maketrans('', '', string.punctuation)
-fileWords = fileText.translate(translateDict)
-# removing punctuation from text
-fileWords = fileWords.split()  # splitting text with whitespace
-stemmed_words = []
 
-for x in fileWords:  # stemming words
+# corpusPath = input()
+# allTxtPaths = list(Path(corpusPath).rglob("*.[tT][xX][tT]"))
+# get all txt paths from corpus
+spFilePath = input()
+snowball_stemmer = SnowballStemmer(language="english")
+spFile = open(str(spFilePath))
+
+wordsInSpFile = word_tokenize(spFile.read())
+
+spFileStemmedWords = []  # lista korenovanih reci iz specificnog fajla
+
+for x in wordsInSpFile:
     if(x.isalnum()):
-        w = ss.stem(x)
-        stemmed_words.append(w)
+        w = snowball_stemmer.stem(x)
+        spFileStemmedWords.append(w)
 
-c = Counter(stemmed_words)
+freqCounter = Counter(spFileStemmedWords)
+listaReciSpFajla = [Word(key, value) for key, value in freqCounter.items()]
+listaReciSpFajla.sort(key=lambda Word: Word.TF, reverse=True)
+# sort by freq
 
-listaReci = [Word(key, value) for key, value in c.items()]
+for w in listaReciSpFajla:
+    print(w.word + " " + str(w.TF))
+
+
+# listaReci = [Word(key, value, 0) for key, value in c.items()]
 # make list of Words
-listaReci.sort(key=lambda Word: Word.frequency, reverse=True)  # sort by freq
-
-for w in listaReci:
-    print(w.word + " " + str(w.frequency))
+# listaReci.sort(key=lambda Word: Word.TF, reverse=True)  # sort by freq
