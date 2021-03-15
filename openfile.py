@@ -10,24 +10,29 @@ class Word:
     TF = 0
     IDF = 0
     ukupBrojFajlova = 0
-    listaProcitanihFajlova = []
+    k = 0
+    word_score = 0
 
-    def __init__(self, word, TF, ukupBrojFajlova, listaProcitanihFajlova):
+    def __init__(self, word, TF, ukupBrojFajlova):
         self.word = word
         self.TF = TF
-        self.listaFajlova = listaProcitanihFajlova
         self.ukupBrojFajlova = ukupBrojFajlova
-        self.IDF = np.log(ukupBrojFajlova / self.k(listaProcitanihFajlova))
 
     def wordScore(self):
-        return self.TF * self.IDF
+        self.word_score = self.TF * self.IDF
+        return self.word_score
+
+    def set_IDF(self, k):
+        self.IDF = np.log(ukupBrojFajlova / k)
+        self.wordScore()
 
 
 corpusPath = input()
 allTxtPaths = list(Path(str(corpusPath)).rglob("*.[tT][xX][tT]"))  # get all txt paths from corpus
 snowball_stemmer = SnowballStemmer(language="english")
+ukupBrojFajlova = len(allTxtPaths)
 
-
+# map all (stemmed) words from all files to a map {path of file word was found in:frequency}
 wordMap = {}
 
 for x in allTxtPaths:  # opening all files in corpus
@@ -44,34 +49,37 @@ for x in allTxtPaths:  # opening all files in corpus
                 wordMap[rec][f.name] += 1
 
 
-# ukupBrojFajlova = len(dictProcitanihFajlova)
-
-# for key in dictProcitanihFajlova:
-
-# print(ukupBrojFajlova)
-
 # specific file stuff
 spFilePath = input()
 spFile = open(str(spFilePath))
 wordsInSpFile = word_tokenize(spFile.read())
-spFileStemmedWords = []  # lista korenovanih reci iz specificnog fajla
+spFileStemmedWords = []  # lista stemovanih reci iz specificnog fajla
 
+# get list of stemmed words
 for x in wordsInSpFile:
     if(x.isalnum()):
         w = snowball_stemmer.stem(x)
         spFileStemmedWords.append(w)
 
 
-# # create Word objects and put them in List
-# freqCounter = Counter(spFileStemmedWords)
-# listaReciSpFajla = [Word(key, value, ukupBrojFajlova, listaProcitanihFajlova)
-#                     for key, value in freqCounter.items()]
-# listaReciSpFajla.sort(key=lambda Word: Word.wordScore(), reverse=True)  # sort by freq
-#
-# print(len(listaReciSpFajla))
-# for rec in listaReciSpFajla:
-#     print("\nRec = " + rec.word)
-#     print("\nWord Score = " + str(rec.wordScore()))
-#     print("\nTF = " + str(rec.TF))
-#     print("\nIDF = " + str(rec.IDF))
-#     print("\n----------------------")
+spfWordCounter = Counter(spFileStemmedWords)
+listaReciSpFajla = [Word(key, value, ukupBrojFajlova)
+                    for key, value in spfWordCounter.items()]
+
+for rec in listaReciSpFajla:
+    for key in wordMap:
+        if(rec.word == key):
+            rec.set_IDF(len(wordMap[key]))
+
+listaReciSpFajla.sort(key=lambda Word: Word.wordScore(), reverse=True)
+
+
+task1out = ""
+
+for i in range(10):
+    task1out = task1out + ' ' + listaReciSpFajla[i].word
+    # print("\nRec = " + listaReciSpFajla[i].word)
+    # print("\nWord Score = " + str(listaReciSpFajla[i].wordScore()))
+    # print("\nTF = " + str(listaReciSpFajla[i].TF))
+    # print("\nIDF = " + str(listaReciSpFajla[i].IDF))
+    # print("\n----------------------")
