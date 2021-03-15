@@ -2,9 +2,7 @@ from pathlib import Path
 from nltk.stem import SnowballStemmer
 from nltk.tokenize import word_tokenize, sent_tokenize
 from collections import Counter
-import nltk
 import numpy as np
-nltk.download('punkt')
 
 
 class Word:
@@ -23,21 +21,24 @@ class Word:
 
     def k(self, listaFajlova):
         br = 0
-        for fajl in listaFajlova:
-            currText = fajl.read()
-            allWordsinCurrFile = word_tokenize(currText)
+
+        for fajl in listaFajlova:  # prosledjivanje liste radi
+            allWordsinCurrFile = word_tokenize(fajl.read())
             currFileStemmedWords = []
 
             for x in allWordsinCurrFile:
                 if(x.isalnum()):
                     w = snowball_stemmer.stem(x)
                     currFileStemmedWords.append(w)
+
             for rec in currFileStemmedWords:
                 if(self.word == rec):
+                    print("nasao rec " + "\"" + self.word + "\"" + " u fajlu " + str(fajl.name))
                     br += 1
                     break
+
         if(br == 0):
-            print("word not found in any file, div by 0")
+            print("\"" + self.word + "\"" + " not found in any file, div by 0")
             return 1
 
         return br
@@ -46,8 +47,8 @@ class Word:
         return self.TF * self.IDF
 
 
-corpusPath = input()
-allTxtPaths = list(Path(str(corpusPath)).rglob("*.[tT][xX][tT]"))  # get all txt paths from corpus
+# corpusPath = input()
+allTxtPaths = list(Path("corpus").rglob("*.[tT][xX][tT]"))  # get all txt paths from corpus
 snowball_stemmer = SnowballStemmer(language="english")
 
 # loading all files
@@ -56,6 +57,7 @@ for x in allTxtPaths:  # opening all files in corpus
     f = open(x)
     listaFajlova.append(f)
 ukupBrojFajlova = len(listaFajlova)
+# print(ukupBrojFajlova)
 
 # specific file stuff
 spFilePath = input()
@@ -72,5 +74,13 @@ freqCounter = Counter(spFileStemmedWords)
 listaReciSpFajla = [Word(key, value, ukupBrojFajlova, listaFajlova)
                     for key, value in freqCounter.items()]
 listaReciSpFajla.sort(key=lambda Word: Word.TF, reverse=True)  # sort by freq
+for rec in listaReciSpFajla:
+    print(rec.word)
 
-print(listaReciSpFajla)
+#
+# for rec in listaReciSpFajla:
+#     print("\nRec = " + rec.word)
+#     print("\nWord Score = " + str(rec.wordScore()))
+#     print("\nTF = " + str(rec.TF))
+#     print("\nIDF = " + str(rec.IDF))
+#     print("\n----------------------")
