@@ -2,41 +2,44 @@ from pathlib import Path
 from nltk.stem import SnowballStemmer
 from nltk.tokenize import word_tokenize, sent_tokenize
 from collections import Counter
-import string
 import nltk
 import numpy as np
 nltk.download('punkt')
 
 
 class Word:
+
     TF = 0
     IDF = 0
+    ukupBrojFajlova = 0
     listaFajlova = []
-    N = 0
 
     def __init__(self, word, TF, ukupBrojFajlova, listaFajlova):
         self.word = word
         self.TF = TF
         self.listaFajlova = listaFajlova
-        self.N = ukupBrojFajlova
+        self.ukupBrojFajlova = ukupBrojFajlova
+        self.IDF = np.log(ukupBrojFajlova / self.k(listaFajlova))
 
-    # def k(self, listaFajlova):
-    #     brojac = 0
-    #     for fajl in listaFajlova:
-    #         currText = fajl.read()
-    #         allWordsinCurrFile = snowball_stemmer.word_tokenize(currText)
-    #         for rec in allWordsinCurrFile:
-    #             if(self.word == rec):
-    #                 br += 1
-    #                 break
-    #     return brojac
-    #
-    # def getIDF(self):
-    #    IDF = np.log(N/self.k(listaFajlova))
-    #    return IDF
-    #
-    # def wordScore():
-    #     return TF*getIDF
+    def k(self, listaFajlova):
+        br = 0
+        for fajl in listaFajlova:
+            currText = fajl.read()
+            allWordsinCurrFile = snowball_stemmer.word_tokenize(currText)
+            currFileStemmedWords = []
+
+            for x in allWordsinCurrFile:
+                if(x.isalnum()):
+                    w = snowball_stemmer.stem(x)
+                    currFileStemmedWords.append(w)
+            for rec in currFileStemmedWords:
+                if(self.word == rec):
+                    br += 1
+                    break
+        return br
+
+    def wordScore(self):
+        return self.TF * self.IDF
 
 
 corpusPath = input()
