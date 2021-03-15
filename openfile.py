@@ -25,7 +25,7 @@ class Word:
         br = 0
         for fajl in listaFajlova:
             currText = fajl.read()
-            allWordsinCurrFile = snowball_stemmer.word_tokenize(currText)
+            allWordsinCurrFile = word_tokenize(currText)
             currFileStemmedWords = []
 
             for x in allWordsinCurrFile:
@@ -36,6 +36,10 @@ class Word:
                 if(self.word == rec):
                     br += 1
                     break
+        if(br == 0):
+            print("word not found in any file, div by 0")
+            return 1
+
         return br
 
     def wordScore(self):
@@ -43,7 +47,7 @@ class Word:
 
 
 corpusPath = input()
-allTxtPaths = list(Path(corpusPath).rglob("*.[tT][xX][tT]"))  # get all txt paths from corpus
+allTxtPaths = list(Path(str(corpusPath)).rglob("*.[tT][xX][tT]"))  # get all txt paths from corpus
 snowball_stemmer = SnowballStemmer(language="english")
 
 # loading all files
@@ -65,6 +69,8 @@ for x in wordsInSpFile:
         spFileStemmedWords.append(w)
 
 freqCounter = Counter(spFileStemmedWords)
-listaReciSpFajla = [Word(key, value, ukupBrojFajlova, None)
+listaReciSpFajla = [Word(key, value, ukupBrojFajlova, listaFajlova)
                     for key, value in freqCounter.items()]
 listaReciSpFajla.sort(key=lambda Word: Word.TF, reverse=True)  # sort by freq
+
+print(listaReciSpFajla)
