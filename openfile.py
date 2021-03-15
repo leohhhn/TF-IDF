@@ -19,30 +19,6 @@ class Word:
         self.ukupBrojFajlova = ukupBrojFajlova
         self.IDF = np.log(ukupBrojFajlova / self.k(listaProcitanihFajlova))
 
-    def k(self, listaProcitanihFajlova):
-        br = 0
-
-        for textInFile in listaProcitanihFajlova:  # prosledjivanje liste radi
-            allWordsinCurrFile = word_tokenize(textInFile)
-            currFileStemmedWords = []
-
-            for x in allWordsinCurrFile:
-                if(x.isalnum()):
-                    w = snowball_stemmer.stem(x)
-                    currFileStemmedWords.append(w)
-
-            for rec in currFileStemmedWords:
-                if(self.word == rec):
-                    # print("nasao rec " + "\"" + self.word + "\"")
-                    br += 1
-                    break
-
-        if(br == 0):
-            print("\"" + self.word + "\"" + " not found in any file, div by 0")
-            return
-
-        return br
-
     def wordScore(self):
         return self.TF * self.IDF
 
@@ -51,16 +27,26 @@ corpusPath = input()
 allTxtPaths = list(Path(str(corpusPath)).rglob("*.[tT][xX][tT]"))  # get all txt paths from corpus
 snowball_stemmer = SnowballStemmer(language="english")
 
-# loading all files
-listaFajlova = []
-for x in allTxtPaths:  # opening all files in corpus
-    f = open(x)
-    listaFajlova.append(f)
-ukupBrojFajlova = len(listaFajlova)
 
-listaProcitanihFajlova = []
-for fajl in listaFajlova:
-    listaProcitanihFajlova.append(fajl.read())
+wordMap = {}
+
+for x in allTxtPaths:  # opening all files in corpus
+    with open(x, 'r') as f:
+        currFileText = f.read()
+        currFileWords = word_tokenize(currFileText)
+        for rec in currFileWords:
+            if(rec.isalnum()):
+                rec = snowball_stemmer.stem(rec)
+                if(rec not in wordMap):
+                    wordMap[rec] = {}
+                if(f.name not in wordMap[rec]):
+                    wordMap[rec][f.name] = 0
+                wordMap[rec][f.name] += 1
+
+
+# ukupBrojFajlova = len(dictProcitanihFajlova)
+
+# for key in dictProcitanihFajlova:
 
 # print(ukupBrojFajlova)
 
@@ -75,16 +61,17 @@ for x in wordsInSpFile:
         w = snowball_stemmer.stem(x)
         spFileStemmedWords.append(w)
 
-# create Word objects and put them in List
-freqCounter = Counter(spFileStemmedWords)
-listaReciSpFajla = [Word(key, value, ukupBrojFajlova, listaProcitanihFajlova)
-                    for key, value in freqCounter.items()]
-listaReciSpFajla.sort(key=lambda Word: Word.wordScore(), reverse=True)  # sort by freq
 
-print(len(listaReciSpFajla))
-for rec in listaReciSpFajla:
-    print("\nRec = " + rec.word)
-    print("\nWord Score = " + str(rec.wordScore()))
-    print("\nTF = " + str(rec.TF))
-    print("\nIDF = " + str(rec.IDF))
-    print("\n----------------------")
+# # create Word objects and put them in List
+# freqCounter = Counter(spFileStemmedWords)
+# listaReciSpFajla = [Word(key, value, ukupBrojFajlova, listaProcitanihFajlova)
+#                     for key, value in freqCounter.items()]
+# listaReciSpFajla.sort(key=lambda Word: Word.wordScore(), reverse=True)  # sort by freq
+#
+# print(len(listaReciSpFajla))
+# for rec in listaReciSpFajla:
+#     print("\nRec = " + rec.word)
+#     print("\nWord Score = " + str(rec.wordScore()))
+#     print("\nTF = " + str(rec.TF))
+#     print("\nIDF = " + str(rec.IDF))
+#     print("\n----------------------")
