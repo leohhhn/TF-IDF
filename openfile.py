@@ -4,7 +4,7 @@ from nltk.stem import SnowballStemmer
 from nltk.tokenize import word_tokenize, sent_tokenize
 from collections import Counter
 import numpy as np
-# sys.stdout.reconfigure(encoding='utf-8')
+sys.stdout.reconfigure(encoding='utf-8')
 
 
 class Word:
@@ -50,6 +50,7 @@ for x in allTxtPaths:  # opening all files in corpus
                 if(f.name not in wordMap[rec]):
                     wordMap[rec][f.name] = 0
                 wordMap[rec][f.name] += 1
+        f.close()
 
 
 # specific file stuff
