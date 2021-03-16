@@ -39,7 +39,7 @@ ukupBrojFajlova = len(allTxtPaths)
 wordMap = {}
 
 for x in allTxtPaths:  # opening all files in corpus
-    with open(x, 'r') as f:
+    with open(x, 'r', encoding='utf-8') as f:
         currFileText = f.read()
         currFileWords = word_tokenize(currFileText)
         for rec in currFileWords:
@@ -55,7 +55,7 @@ for x in allTxtPaths:  # opening all files in corpus
 
 # specific file stuff
 spFilePath = input()
-spFile = open(str(spFilePath))
+spFile = open(str(spFilePath), encoding='utf-8')
 readFile = spFile.read()
 spFile.close()
 wordsInSpFile = word_tokenize(readFile)
@@ -78,7 +78,8 @@ for rec in listaReciSpFajla:
         if(rec.word == key):
             rec.set_IDF(len(wordMap[key]))
 
-listaReciSpFajla.sort(key=lambda Word: Word.wordScore(), reverse=True)
+listaReciSpFajla.sort(key=lambda Word:  (100000 - Word.wordScore(), Word.word))
+
 
 task1out = ""
 
@@ -88,7 +89,6 @@ if(len(listaReciSpFajla) >= 10):
 else:
     for i in range(len(listaReciSpFajla)):
         task1out += listaReciSpFajla[i].word + ', '
-
 print(task1out[:-2])
 
 
