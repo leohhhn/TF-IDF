@@ -1,8 +1,10 @@
+import sys
 from pathlib import Path
 from nltk.stem import SnowballStemmer
 from nltk.tokenize import word_tokenize, sent_tokenize
 from collections import Counter
 import numpy as np
+# sys.stdout.reconfigure(encoding='utf-8')
 
 
 class Word:
@@ -32,6 +34,7 @@ allTxtPaths = list(Path(str(corpusPath)).rglob("*.[tT][xX][tT]"))  # get all txt
 snowball_stemmer = SnowballStemmer(language="english")
 ukupBrojFajlova = len(allTxtPaths)
 
+
 # map all (stemmed) words from all files to a map {path of file word was found in:frequency}
 wordMap = {}
 
@@ -52,7 +55,10 @@ for x in allTxtPaths:  # opening all files in corpus
 # specific file stuff
 spFilePath = input()
 spFile = open(str(spFilePath))
-wordsInSpFile = word_tokenize(spFile.read())
+readFile = spFile.read()
+spFile.close()
+wordsInSpFile = word_tokenize(readFile)
+
 spFileStemmedWords = []  # lista stemovanih reci iz specificnog fajla
 
 # get list of stemmed words
@@ -73,13 +79,47 @@ for rec in listaReciSpFajla:
 
 listaReciSpFajla.sort(key=lambda Word: Word.wordScore(), reverse=True)
 
-
 task1out = ""
 
-for i in range(10):
-    task1out = task1out + ' ' + listaReciSpFajla[i].word
-    # print("\nRec = " + listaReciSpFajla[i].word)
-    # print("\nWord Score = " + str(listaReciSpFajla[i].wordScore()))
-    # print("\nTF = " + str(listaReciSpFajla[i].TF))
-    # print("\nIDF = " + str(listaReciSpFajla[i].IDF))
-    # print("\n----------------------")
+if(len(listaReciSpFajla) >= 10):
+    for i in range(10):
+        task1out += listaReciSpFajla[i].word + ', '
+else:
+    for i in range(len(listaReciSpFajla)):
+        task1out += listaReciSpFajla[i].word + ', '
+
+print(task1out[:-2])
+
+
+# TASK 2
+
+sentInSpFile = sent_tokenize(readFile)
+sentMap = {}
+
+for sent in sentInSpFile:
+    sentScore = 0
+    currSentWords = word_tokenize(sent)
+    for rec in currSentWords:
+        rec = snowball_stemmer.stem(rec)
+        for wordObj in listaReciSpFajla:
+            if(rec == wordObj.word):
+                sentScore += wordObj.word_score
+    sentMap[sent] = sentScore
+
+sentMapCopy = {}
+sorted_keys = sorted(sentMap, key=sentMap.get, reverse=True)
+
+if(len(sorted_keys) >= 5):
+    for i in range(5):
+        sentMapCopy[sorted_keys[i]] = sentMap[sorted_keys[i]]
+else:
+    for i in range(len(sorted_keys)):
+        sentMapCopy[sorted_keys[i]] = sentMap[sorted_keys[i]]
+
+
+task2out = ""
+for sent in sentMap:
+    for snt in sentMapCopy:
+        if(sent == snt):
+            task2out += sent + ' '
+print(task2out[:-1])
